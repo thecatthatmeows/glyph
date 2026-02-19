@@ -3,6 +3,7 @@ I made this project cuz I was bored
 
 ## Video Examples
 (accessed through `cargo run --example <example>`)
+https://github.com/user-attachments/assets/515dfc50-eeb2-408e-8959-8fa2034ccdfa
 
 ## How to run
 1. download rust
