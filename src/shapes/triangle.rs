@@ -1,8 +1,8 @@
 use std::{f32::consts::{FRAC_PI_2, FRAC_PI_4, PI}, fmt::format, io::stdout};
 
-use crossterm::{queue, style::{Color, Print}};
+use crossterm::{cursor::MoveTo, queue, style::{Color, Print, SetForegroundColor}, terminal};
 
-use crate::{shapes::{Orientation, line::Line}, types::vec2::Vec2};
+use crate::{shapes::{Orientation, inside_triangle, line::Line}, types::vec2::Vec2};
 
 pub struct Triangle {
     pub base_vertices: TriangleVertices,
@@ -18,6 +18,12 @@ pub struct TriangleVertices {
     pub top_left: Vec2<f32>,
     pub bottom_left: Vec2<f32>,
     pub bottom_right: Vec2<f32>,
+}
+
+impl TriangleVertices {
+    pub fn to_arr(&self) -> [Vec2<f32>; 3] {
+        [self.top_left, self.bottom_left, self.bottom_right]
+    }
 }
 
 impl From<&[Vec2<f32>; 3]> for TriangleVertices {
@@ -56,6 +62,48 @@ impl Triangle {
         self.update_geometry();
     }
 
+    fn fill_color(&self) {
+        let (term_width, term_height) = terminal::size().unwrap();
+
+        let vertices = self.vertices.to_arr();
+        // let screen_vertices = [
+        //     vertices[0] + center,
+        //     vertices[1] + center,
+        //     vertices[2] + center,
+        // ];
+        let mut x = vec![];
+        let mut y = vec![];
+
+        for vertex in vertices {
+            x.push(vertex.x as i32);
+            y.push(vertex.y as i32);
+        }
+
+        let min_x = vertices.iter().map(|v| v.x as i32).min().unwrap();
+        let max_x = vertices.iter().map(|v| v.x as i32).max().unwrap();
+        let min_y = vertices.iter().map(|v| v.y as i32).min().unwrap();
+        let max_y = vertices.iter().map(|v| v.y as i32).max().unwrap();
+
+        for y in min_y..=max_y {
+            for x in min_x..=max_x {
+                let p = Vec2::new(x as f32, y as f32);
+
+                if inside_triangle(vertices[0], vertices[1], vertices[2], p) {
+                    let screen_x = (x) as u16;
+                    let screen_y = (y) as u16;
+
+                    if screen_x < term_width && screen_y < term_height {
+                        queue!(
+                            stdout(),
+                            MoveTo(screen_x, screen_y),
+                            Print("█")
+                        ).unwrap();
+                    }
+                }
+            }
+        }
+    }
+
     fn update_geometry(&mut self) {
         let rad = self.rad();
         let x_scale = 2.0;
@@ -71,13 +119,17 @@ impl Triangle {
         rp2.x *= x_scale;
         rp3.x *= x_scale;
 
-        self.vertices.top_left = rp1;
-        self.vertices.bottom_left = rp2;
-        self.vertices.bottom_right = rp3;
+        // self.vertices.top_left = rp1;
+        // self.vertices.bottom_left = rp2;
+        // self.vertices.bottom_right = rp3;
 
         let sp1 = Self::to_screen_coords(rp1, self.center);
         let sp2 = Self::to_screen_coords(rp2, self.center);
         let sp3 = Self::to_screen_coords(rp3, self.center);
+
+        self.vertices.top_left = sp1;
+        self.vertices.bottom_left = sp2;
+        self.vertices.bottom_right = sp3;
 
         self.lines = [
             Line::new(sp1, sp2, self.color),
@@ -101,6 +153,7 @@ impl Triangle {
     }
 
     pub fn draw(&self) {
+        self.fill_color();
         for line in &self.lines {
             line.draw();
         }
