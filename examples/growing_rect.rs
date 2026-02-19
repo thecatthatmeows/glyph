@@ -19,7 +19,7 @@ fn main() -> Result<()> {
 
         rect.draw();
         rect.update();
-        rect.size += Vec2::new(0.1, 0.1);
+        rect.size += Vec2::splat(0.5);
 
         handle_key(KeyCode::Char('q'), || is_running = false );
     }
