@@ -110,6 +110,13 @@ where
         std::mem::swap(&mut self.x, &mut self.y);
     }
 
+    pub fn swapped(&self) -> Self {
+        Self {
+            x: self.y,
+            y: self.x,
+        }
+    }
+
     pub fn to_f32(&self) -> Vec2<f32> {
         Vec2::<f32> {
             x: self.x.to_f32().unwrap(),
