@@ -11,7 +11,7 @@ fn main() -> Result<()> {
 
     let term_size = get_terminal_size()?;
     let initial_pos = term_size / Vec2::splat(2);
-    let mut rect = Rectangle::new(initial_pos.to_f32(), Vec2::new(5.0, 0.0).swap(), Color::Green);
+    let mut rect = Rectangle::new(initial_pos.to_f32(), Vec2::new(5.0, 0.0), Color::Green);
 
     let mut rad = FRAC_PI_4;
 
@@ -23,7 +23,7 @@ fn main() -> Result<()> {
         rect.update();
         rect.size += Vec2::splat(0.5);
 
-        rect.rotate(rad);
+        rect.rotate_to(rad);
         rad = (rad * 2.0) % (PI * 2.0);
 
         handle_key(KeyCode::Char('q'), || is_running = false );

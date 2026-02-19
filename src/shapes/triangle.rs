@@ -57,13 +57,7 @@ impl Triangle {
     }
 
     fn update_geometry(&mut self) {
-        let rad = match self.orientation {
-            Orientation::Up => 0.0,
-            Orientation::Right => PI/2.0, // 90
-            Orientation::Down => PI, // 180
-            Orientation::Left => 3.0 * PI/2.0, // 270
-            Orientation::Custom(v) => v
-        };
+        let rad = self.rad();
         let x_scale = match self.orientation {
             Orientation::Right | Orientation::Left => 2.0,
             _ => 1.0
@@ -97,6 +91,16 @@ impl Triangle {
             Line::new(sp2, sp3, self.color),
             Line::new(sp3, sp1, self.color),
         ];
+    }
+
+    pub fn rad(&self) -> f32 {
+        match self.orientation {
+            Orientation::Up => 0.0,
+            Orientation::Right => PI/2.0, // 90
+            Orientation::Down => PI, // 180
+            Orientation::Left => 3.0 * PI/2.0, // 270
+            Orientation::Custom(v) => v
+        }
     }
 
     fn to_screen_coords(v: Vec2<f32>, center: Vec2<f32>) -> Vec2<f32> {

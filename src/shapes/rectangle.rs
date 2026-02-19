@@ -13,8 +13,9 @@ pub struct Rectangle {
 }
 
 impl Rectangle {
-    pub fn new(pos: Vec2<f32>, size: Vec2<f32>, color: Color) -> Self {
+    pub fn new(pos: Vec2<f32>, mut size: Vec2<f32>, color: Color) -> Self {
         let orientation = Orientation::Left;
+        size.swap();
         let upper = Triangle::new(pos, orientation, size, color);
         let bottom = Triangle::new(pos, orientation.opposite(), size, color);
         // upper.vertices.bottom_right += size;
@@ -43,7 +44,7 @@ impl Rectangle {
         }
     }
 
-    pub fn rotate(&mut self, rad: f32) {
+    pub fn rotate_to(&mut self, rad: f32) {
         self.triangles[0].orientation = Orientation::Custom(rad);
         self.triangles[1].orientation = Orientation::Custom(rad).opposite();
     }
