@@ -167,9 +167,9 @@ impl Triangle {
         Vec2::new(v.x + center.x, -v.y + center.y)
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
         self.fill_color();
-        for line in &self.lines {
+        for line in &mut self.lines {
             line.draw();
         }
     }

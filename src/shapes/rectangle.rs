@@ -58,8 +58,8 @@ impl Rectangle {
         self.orientation = Orientation::Custom(rad).opposite();
     }
 
-    pub fn draw(&self) {
-        for triangle in &self.triangles {
+    pub fn draw(&mut self) {
+        for triangle in &mut self.triangles {
             triangle.draw();
         }
     }

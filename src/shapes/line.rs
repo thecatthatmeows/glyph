@@ -1,32 +1,39 @@
 use std::io::{Write, stdout};
 
-use crossterm::{cursor::MoveTo, queue, style::{Color, Print, SetForegroundColor}, terminal};
+use crossterm::{
+    queue,
+    style::{Color, SetForegroundColor},
+    terminal,
+};
 
-use crate::types::vec2::Vec2;
+use crate::{buffer::Buffer, types::vec2::Vec2};
 
 pub struct Line {
     pub pos1: Vec2<f32>,
     pub pos2: Vec2<f32>,
-    pub color: Color
+    pub color: Color,
+    pub buffer: Buffer,
 }
 
 impl Line {
     pub fn new(pos1: impl Into<Vec2<f32>>, pos2: impl Into<Vec2<f32>>, color: Color) -> Self {
+        let (term_width, term_height) = terminal::size().unwrap();
         Self {
             pos1: pos1.into(),
             pos2: pos2.into(),
-            color
+            color,
+            buffer: Buffer::new(term_width.into(), term_height.into()),
         }
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
         let mut stdout = stdout().lock();
 
         queue!(stdout, SetForegroundColor(self.color)).unwrap();
 
-        let (term_width, term_height) = terminal::size().unwrap();
-        let term_width = term_width as i32;
-        let term_height = term_height as i32;
+        // let (term_width, term_height) = terminal::size().unwrap();
+        // let term_width = term_width as i32;
+        // let term_height = term_height as i32;
 
         let x0 = self.pos1.x as i32;
         let y0 = self.pos1.y as i32;
@@ -41,14 +48,16 @@ impl Line {
         let mut x = x0;
         let mut y = y0;
 
-        let mut buf = Vec::with_capacity(1024);
+        // let mut buf = Vec::with_capacity(1024);
         loop {
-            if x >= 0 && x < term_width
-            && y >= 0 && y < term_height {
-                buf.push((x, y));
-            }
+            self.buffer.set_pixel(x as usize, y as usize, '█');
+            // if x >= 0 && x < term_width && y >= 0 && y < term_height {
+            //     buf.push((x, y));
+            // }
 
-            if x == x1 && y == y1 { break; }
+            if x == x1 && y == y1 {
+                break;
+            }
             let e2 = err * 2;
             if e2 >= dy {
                 err += dy;
@@ -60,14 +69,16 @@ impl Line {
             }
         }
 
-        for (x, y) in buf {
-            queue!(
-                stdout,
-                MoveTo(x as u16, y as u16),
-                // SetForegroundColor(self.color),
-                Print("█")
-            ).unwrap();
-        }
+        self.buffer.render(&mut stdout);
+        // for (x, y) in buf {
+        //     queue!(
+        //         stdout,
+        //         MoveTo(x as u16, y as u16),
+        //         // SetForegroundColor(self.color),
+        //         Print("█")
+        //     )
+        //     .unwrap();
+        // }
 
         stdout.flush().unwrap();
     }
