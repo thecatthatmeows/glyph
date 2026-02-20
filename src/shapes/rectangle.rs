@@ -8,8 +8,9 @@ pub struct Rectangle {
     pub pos: Vec2<f32>,
     pub size: Vec2<f32>,
     pub orientation: Orientation,
+    pub color: Color,
+    pub z_index: i32,
     triangles: [Triangle; 2],
-    color: Color,
 }
 
 impl Rectangle {
@@ -24,8 +25,9 @@ impl Rectangle {
         Self {
             pos,
             size,
-            color,
             orientation,
+            color,
+            z_index: 0,
             triangles: [upper, bottom],
         }
     }
@@ -35,6 +37,7 @@ impl Rectangle {
         let bottom = Triangle::new(self.pos, self.orientation.opposite(), self.size, self.color);
 
         self.triangles = [upper, bottom];
+        self.triangles.sort_by_key(|triangle| triangle.z_index);
 
         for triangle in &mut self.triangles {
             triangle.update();

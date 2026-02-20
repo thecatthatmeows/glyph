@@ -1,18 +1,16 @@
-use std::{
-    f32::consts::{FRAC_PI_2, PI},
-    io::stdout,
+use crate::{
+    shapes::{Orientation, inside_triangle, line::Line},
+    types::vec2::Vec2,
 };
-
 use crossterm::{
     cursor::MoveTo,
     queue,
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
-
-use crate::{
-    shapes::{Orientation, inside_triangle, line::Line},
-    types::vec2::Vec2,
+use std::{
+    f32::consts::{FRAC_PI_2, PI},
+    io::stdout,
 };
 
 pub struct Triangle {
@@ -20,8 +18,9 @@ pub struct Triangle {
     pub vertices: TriangleVertices,
     pub orientation: Orientation,
     pub center: Vec2<f32>,
+    pub z_index: i32,
+    pub color: Color,
     lines: [Line; 3],
-    color: Color,
 }
 
 #[derive(Clone, Copy)]
@@ -66,6 +65,7 @@ impl Triangle {
                 Line::new(p3, p1, color),
             ],
             color,
+            z_index: 0,
         }
     }
 
