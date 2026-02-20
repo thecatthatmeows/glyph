@@ -24,7 +24,6 @@ Too bad, we dont plan on Glyph being used for embedding animations inside anothe
 
 Features:
 - More shapes
-- Z-index (depth sorting)
 - Some sort of a camera system
 
 ## Contribution
