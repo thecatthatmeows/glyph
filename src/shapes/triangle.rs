@@ -84,6 +84,7 @@ impl Triangle {
         let min_y = vertices.iter().map(|v| v.y as i32).min().unwrap();
         let max_y = vertices.iter().map(|v| v.y as i32).max().unwrap();
 
+        let mut buf = Vec::with_capacity(1024);
         for y in min_y..=max_y {
             for x in min_x..=max_x {
                 let p = Vec2::new(x as f32, y as f32);
@@ -93,14 +94,18 @@ impl Triangle {
                     let screen_y = (y) as u16;
 
                     if screen_x < term_width && screen_y < term_height {
-                        queue!(
-                            stdout(),
-                            MoveTo(screen_x, screen_y),
-                            Print("█")
-                        ).unwrap();
+                        buf.push((screen_x, screen_y));
                     }
                 }
             }
+        }
+
+        for (x, y) in buf {
+            queue!(
+                stdout(),
+                MoveTo(x, y),
+                Print("█")
+            ).unwrap();
         }
     }
 

@@ -36,16 +36,13 @@ impl Line {
         let mut x = x0;
         let mut y = y0;
 
+        let mut buf = Vec::with_capacity(1024);
         loop {
             if x >= 0 && x < term_width as i32
             && y >= 0 && y < term_height as i32 {
-                queue!(
-                    stdout,
-                    MoveTo(x as u16, y as u16),
-                    SetForegroundColor(self.color),
-                    Print("█")
-                ).unwrap();
+                buf.push((x, y));
             }
+
             if x == x1 && y == y1 { break; }
             let e2 = err * 2;
             if e2 >= dy {
@@ -56,6 +53,15 @@ impl Line {
                 err += dx;
                 y += sy;
             }
+        }
+
+        for (x, y) in buf {
+            queue!(
+                stdout,
+                MoveTo(x as u16, y as u16),
+                SetForegroundColor(self.color),
+                Print("█")
+            ).unwrap();
         }
 
         stdout.flush().unwrap();
