@@ -5,6 +5,7 @@ Glyph is a 2d game engine that works in the terminal. For now, it is in very ver
     - triangles
     - lines
 - 2d rotation
+- Z-index (depth sorting)
 
 Although the terminal wasnt really made for games, this serves more as a fun project to work on.
 I made this project cuz I was bored
