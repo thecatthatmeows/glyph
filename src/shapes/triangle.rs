@@ -10,7 +10,9 @@ use crossterm::{
 };
 use std::{
     f32::consts::{FRAC_PI_2, PI},
-    io::stdout,
+    io::{StdoutLock, stdout},
+    thread::sleep,
+    time::Duration,
 };
 
 pub struct Triangle {
@@ -21,6 +23,7 @@ pub struct Triangle {
     pub z_index: i32,
     pub color: Color,
     lines: [Line; 3],
+    stdout: StdoutLock<'static>,
 }
 
 #[derive(Clone, Copy)]
@@ -66,6 +69,7 @@ impl Triangle {
             ],
             color,
             z_index: 0,
+            stdout: stdout().lock(),
         }
     }
 
@@ -73,9 +77,8 @@ impl Triangle {
         self.update_geometry();
     }
 
-    fn fill_color(&self) {
-        let mut stdout = stdout().lock();
-        queue!(stdout, SetForegroundColor(self.color)).unwrap();
+    fn fill_color(&mut self) {
+        queue!(self.stdout, SetForegroundColor(self.color)).unwrap();
 
         let (term_width, term_height) = terminal::size().unwrap();
 
@@ -115,7 +118,7 @@ impl Triangle {
         }
 
         for (x, y) in buf {
-            queue!(stdout, MoveTo(x, y), Print("█")).unwrap();
+            queue!(self.stdout, MoveTo(x, y), Print("█")).unwrap();
         }
     }
 
@@ -172,5 +175,7 @@ impl Triangle {
         for line in &mut self.lines {
             line.draw();
         }
+
+        // sleep(Duration::from_millis(16)); // 0.016666 seconds (deltatime) = 60 fps
     }
 }

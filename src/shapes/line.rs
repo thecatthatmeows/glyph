@@ -1,18 +1,20 @@
-use std::io::{Write, stdout};
+use std::io::{StdoutLock, Write, stdout};
 
+use crate::{
+    buffer::{FRAME_BUFFER, FrameBuffer},
+    types::vec2::Vec2,
+};
 use crossterm::{
     queue,
     style::{Color, SetForegroundColor},
     terminal,
 };
 
-use crate::{buffer::FrameBuffer, types::vec2::Vec2};
-
 pub struct Line {
     pub pos1: Vec2<f32>,
     pub pos2: Vec2<f32>,
     pub color: Color,
-    pub buffer: FrameBuffer,
+    stdout: StdoutLock<'static>,
 }
 
 impl Line {
@@ -22,14 +24,14 @@ impl Line {
             pos1: pos1.into(),
             pos2: pos2.into(),
             color,
-            buffer: FrameBuffer::new(term_width.into(), term_height.into()),
+            stdout: stdout().lock(),
         }
     }
 
     pub fn draw(&mut self) {
-        let mut stdout = stdout().lock();
+        let mut buffer = FRAME_BUFFER.lock();
 
-        queue!(stdout, SetForegroundColor(self.color)).unwrap();
+        queue!(self.stdout, SetForegroundColor(self.color)).unwrap();
 
         // let (term_width, term_height) = terminal::size().unwrap();
         // let term_width = term_width as i32;
@@ -50,7 +52,7 @@ impl Line {
 
         // let mut buf = Vec::with_capacity(1024);
         loop {
-            self.buffer.set_pixel(x as usize, y as usize, '█');
+            buffer.set_pixel(x as usize, y as usize, '█');
             // if x >= 0 && x < term_width && y >= 0 && y < term_height {
             //     buf.push((x, y));
             // }
@@ -69,7 +71,7 @@ impl Line {
             }
         }
 
-        self.buffer.render(&mut stdout);
+        buffer.render(&mut self.stdout);
         // for (x, y) in buf {
         //     queue!(
         //         stdout,
@@ -80,6 +82,6 @@ impl Line {
         //     .unwrap();
         // }
 
-        stdout.flush().unwrap();
+        self.stdout.flush().unwrap();
     }
 }

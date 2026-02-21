@@ -1,4 +1,4 @@
-use std::io::stdout;
+use std::{io::stdout, thread::sleep, time::Duration};
 
 use crossterm::{
     cursor::MoveTo,

@@ -485,7 +485,9 @@ dependencies = [
  "color-eyre",
  "crossterm",
  "glam",
+ "lazy_static",
  "num-traits",
+ "parking_lot",
  "ratatui",
 ]
 

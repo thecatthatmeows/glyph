@@ -1,3 +1,5 @@
+use std::{thread::sleep, time::Duration};
+
 use crate::{
     shapes::{Orientation, triangle::Triangle},
     types::vec2::Vec2,

@@ -1,4 +1,15 @@
+use parking_lot::Mutex;
+
+use crate::utils::get_terminal_size;
 use crossterm::{cursor::MoveTo, queue, style::Print};
+use lazy_static::lazy_static;
+
+lazy_static! {
+    pub static ref FRAME_BUFFER: Mutex<FrameBuffer> = Mutex::new(FrameBuffer::new(
+        get_terminal_size().unwrap().x as usize,
+        get_terminal_size().unwrap().y as usize
+    ));
+}
 
 /// The `FrameBuffer` struct was made to render text-based graphics *faster* than just telling the
 /// terminal to move the cursor and print each character individually.
@@ -43,5 +54,6 @@ impl FrameBuffer {
             }
             queue!(out, Print('\n')).unwrap();
         }
+        out.flush().unwrap();
     }
 }
