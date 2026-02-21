@@ -10,10 +10,11 @@ Glyph is a 2d game engine that works in the terminal. For now, it is in very ver
 Although the terminal wasnt really made for games, this serves more as a fun project to work on.
 I made this project cuz I was bored
 
-## Video Examples
+## Examples
 (accessed through `cargo run --example <example>`)
 ![2026-02-1912-37-51-ezgif com-optimize](https://github.com/user-attachments/assets/14cb95dc-af26-4911-92a8-3882d8986380)
 ![2026-02-2000-13-40-ezgif com-optimize](https://github.com/user-attachments/assets/a0cc2d7b-fec0-48b2-bb36-4ffa6a4ddfea)
+<img width="1921" height="1081" alt="image" src="https://github.com/user-attachments/assets/bf086417-5807-404b-ada0-7b9f4736b77b" />
 
 ## How to run
 1. download rust
