@@ -59,10 +59,6 @@ fn main() -> color_eyre::Result<()> {
     while is_running {
         execute!(stdout, Clear(ClearType::All), MoveTo(0, 0)).unwrap();
 
-        // for rect in &mut rectangles {
-        //     rect.draw();
-        //     rect.update();
-        // }
         parent_rect.draw();
         parent_rect.update();
 
