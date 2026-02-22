@@ -8,6 +8,17 @@ homepage = "https://github.com/thecatthatmeows/glyph"
 repository = "https://github.com/thecatthatmeows/glyph"
 readme = "README.md"
 
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+incremental = false
+debug = 0
+debug-assertions = false
+strip = "all"
+
 [dependencies]
 color-eyre = "0.6.5"
 crossterm = "0.29.0"
