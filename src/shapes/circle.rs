@@ -46,6 +46,18 @@ impl Circle {
     }
 }
 
+impl Clone for Circle {
+    fn clone(&self) -> Self {
+        // Triangles (and their stdout locks) are not directly cloneable.
+        // Recreate the triangles array using the same radius and sector count.
+        let n_sectors = self.triangles.len();
+        let mut c = Circle::new(self.center, self.radius, n_sectors, self.color);
+        c.orientation = self.orientation;
+        c.z_index = self.z_index;
+        c
+    }
+}
+
 impl Shape for Circle {
     fn draw(&mut self) {
         // let mut triangles = Vec::new();
@@ -53,7 +65,7 @@ impl Shape for Circle {
         //     let theta = i as f32 * (2.0 * std::f32::consts::PI) / self.triangles.len() as f32;
         //     let next_theta =
         //         (i + 1) as f32 * (2.0 * std::f32::consts::PI) / self.triangles.len() as f32;
-
+    
         //     let p1 = self.center;
         //     let p2 = self.center
         //         + Vec2 {
@@ -65,7 +77,7 @@ impl Shape for Circle {
         //             x: self.radius * next_theta.cos(),
         //             y: self.radius * next_theta.sin(),
         //         };
-
+    
         //     let mut triangle =
         //         Triangle::new(p1, Orientation::Right, Vec2::splat(self.radius), self.color);
         //     // triangle.base_vertices.bottom_left = p1;
@@ -74,23 +86,27 @@ impl Shape for Circle {
         //     triangles.push(triangle);
         // }
         // self.triangles = triangles;
-
+    
         for triangle in &mut self.triangles {
             triangle.draw();
         }
     }
-
+    
     fn update(&mut self) {
         for triangle in &mut self.triangles {
             triangle.update();
         }
     }
-
+    
     fn set_orientation(&mut self, orientation: Orientation) {
         self.orientation = orientation;
     }
-
+    
     fn orientation(&self) -> Orientation {
         self.orientation
+    }
+    
+    fn box_clone(&self) -> Box<dyn Shape> {
+        Box::new(self.clone())
     }
 }

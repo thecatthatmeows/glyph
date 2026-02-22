@@ -13,6 +13,7 @@ pub struct Rectangle {
     pub color: Color,
     pub z_index: i32,
     triangles: [Triangle; 2],
+    pub children: Vec<Box<dyn Shape>>,
 }
 
 impl Rectangle {
@@ -31,6 +32,32 @@ impl Rectangle {
             color,
             z_index: 0,
             triangles: [upper, bottom],
+            children: vec![],
+        }
+    }
+
+    pub fn push(&mut self, child: Box<dyn Shape>) {
+        self.children.push(child);
+    }
+}
+
+impl Clone for Rectangle {
+    fn clone(&self) -> Self {
+        // Recreate the triangles rather than attempting to clone Triangle directly
+        // (Triangle contains a StdoutLock which is not Clone). Children are cloned
+        // via the Box<dyn Shape> Clone implementation (requires each concrete
+        // shape to implement `box_clone`).
+        let upper = Triangle::new(self.pos, self.orientation, self.size, self.color);
+        let bottom = Triangle::new(self.pos, self.orientation.opposite(), self.size, self.color);
+
+        Self {
+            pos: self.pos,
+            size: self.size,
+            orientation: self.orientation,
+            color: self.color,
+            z_index: self.z_index,
+            triangles: [upper, bottom],
+            children: self.children.iter().map(|c| c.clone()).collect(),
         }
     }
 }
@@ -46,11 +73,20 @@ impl Shape for Rectangle {
         for triangle in &mut self.triangles {
             triangle.update();
         }
+
+        for child in &mut self.children {
+            child.update();
+        }
     }
 
     fn draw(&mut self) {
         for triangle in &mut self.triangles {
             triangle.draw();
+        }
+
+        // is this considered recursive or..??
+        for child in &mut self.children {
+            child.draw();
         }
     }
 
@@ -60,5 +96,9 @@ impl Shape for Rectangle {
 
     fn orientation(&self) -> Orientation {
         self.orientation
+    }
+
+    fn box_clone(&self) -> Box<dyn Shape> {
+        Box::new(self.clone())
     }
 }

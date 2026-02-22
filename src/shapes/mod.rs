@@ -38,11 +38,21 @@ impl Orientation {
     }
 }
 
+/// Trait representing drawable/updatable shapes.
+///
+/// Note: a `box_clone` method is required so trait objects (`Box<dyn Shape>`)
+/// can be cloned. Each concrete `Shape` implementation must provide a
+/// `box_clone` implementation (commonly implemented as `Box::new(self.clone())`).
 pub trait Shape {
     fn draw(&mut self);
     fn update(&mut self);
     fn set_orientation(&mut self, orientation: Orientation);
     fn orientation(&self) -> Orientation;
+
+    /// Return a boxed clone of this shape. This is required for cloning
+    /// `Box<dyn Shape>` trait objects.
+    fn box_clone(&self) -> Box<dyn Shape>;
+
     fn rotate_to(&mut self, rad: f32) {
         self.set_orientation(Orientation::Custom(rad));
     }
@@ -50,6 +60,13 @@ pub trait Shape {
         let last_rad = self.orientation().to_f32();
         let new_rad = last_rad + rad;
         self.set_orientation(Orientation::Custom(new_rad));
+    }
+}
+
+/// Allow cloning boxed trait objects: `Box<dyn Shape>`.
+impl Clone for Box<dyn Shape> {
+    fn clone(&self) -> Box<dyn Shape> {
+        self.box_clone()
     }
 }
 

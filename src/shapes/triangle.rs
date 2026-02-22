@@ -182,3 +182,23 @@ impl Triangle {
         // sleep(Duration::from_millis(16)); // 0.016666 seconds (deltatime) = 60 fps
     }
 }
+
+impl Clone for Triangle {
+    fn clone(&self) -> Self {
+        let verts = self.vertices.to_arr();
+        Self {
+            base_vertices: self.base_vertices,
+            vertices: self.vertices,
+            orientation: self.orientation,
+            center: self.center,
+            z_index: self.z_index,
+            color: self.color,
+            lines: [
+                Line::new(verts[0], verts[1], self.color),
+                Line::new(verts[1], verts[2], self.color),
+                Line::new(verts[2], verts[0], self.color),
+            ],
+            stdout: stdout().lock(),
+        }
+    }
+}

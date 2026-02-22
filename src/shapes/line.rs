@@ -87,3 +87,18 @@ impl Line {
         // self.stdout.flush().unwrap();
     }
 }
+
+/// Manual Clone impl: StdoutLock isn't Clone, so create a fresh lock for the clone.
+/// This mirrors how other shapes create their stdout locks and keeps clone semantics
+/// consistent by duplicating the visible state (pos1, pos2, color) while acquiring
+/// a new stdout lock for use in the cloned instance.
+impl Clone for Line {
+    fn clone(&self) -> Self {
+        Self {
+            pos1: self.pos1,
+            pos2: self.pos2,
+            color: self.color,
+            stdout: stdout().lock(),
+        }
+    }
+}
