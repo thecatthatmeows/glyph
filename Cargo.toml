@@ -17,7 +17,7 @@ overflow-checks = false
 incremental = false
 debug = 0
 debug-assertions = false
-strip = "all"
+strip = true
 
 [dependencies]
 color-eyre = "0.6.5"
