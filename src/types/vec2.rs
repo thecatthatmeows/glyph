@@ -89,9 +89,19 @@ impl<T: Float> Vec2<T> {
             y: -self.x * sin + self.y * cos,
         }
     }
+
+    pub fn zero() -> Self
+    where
+        T: num_traits::Zero,
+    {
+        Self {
+            x: <T as num_traits::Zero>::zero(),
+            y: <T as num_traits::Zero>::zero(),
+        }
+    }
 }
 
-impl<T> Vec2<T> 
+impl<T> Vec2<T>
 where
     T: Copy + Add<Output = T> + ToPrimitive
 {
