@@ -1,19 +1,10 @@
 use crate::{
-    shapes::{Orientation, Shape, inside_triangle, line::Line},
+    shapes::{Orientation, Shape, inside_triangle, line::Line, pixel::{Pixel, flush_pixels}},
     types::vec2::Vec2,
 };
-use crossterm::{
-    cursor::MoveTo,
-    queue,
-    style::{Color, Print, SetForegroundColor},
-    terminal,
-};
-use std::{
-    f32::consts::{FRAC_PI_2, PI},
-    io::{StdoutLock, stdout},
-    thread::sleep,
-    time::Duration,
-};
+use crossterm::style::Color;
+use crossterm::terminal;
+use std::f32::consts::{FRAC_PI_2, PI};
 
 pub struct Triangle {
     pub base_vertices: TriangleVertices,
@@ -23,7 +14,6 @@ pub struct Triangle {
     pub z_index: i32,
     pub color: Color,
     lines: Vec<Line>,
-    stdout: StdoutLock<'static>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -69,54 +59,39 @@ impl Triangle {
             ],
             color,
             z_index: 0,
-            stdout: stdout().lock(),
         }
     }
 
-    fn fill_color(&mut self) {
-        queue!(self.stdout, SetForegroundColor(self.color)).unwrap();
-
-        let (term_width, term_height) = terminal::size().unwrap();
+    /// Rasterize triangle interior into the output pixel buffer.
+    /// `term_size` is (width, height) in terminal cells.
+    fn rasterize(&self, out: &mut Vec<Pixel>, term_size: (u16, u16)) {
+        let (term_width, term_height) = (term_size.0 as i32, term_size.1 as i32);
 
         let vertices = self.vertices.to_arr();
-        // let screen_vertices = [
-        //     vertices[0] + center,
-        //     vertices[1] + center,
-        //     vertices[2] + center,
-        // ];
-        let mut x = vec![];
-        let mut y = vec![];
-
-        for vertex in vertices {
-            x.push(vertex.x as i32);
-            y.push(vertex.y as i32);
-        }
 
         let min_x = vertices.iter().map(|v| v.x as i32).min().unwrap();
         let max_x = vertices.iter().map(|v| v.x as i32).max().unwrap();
         let min_y = vertices.iter().map(|v| v.y as i32).min().unwrap();
         let max_y = vertices.iter().map(|v| v.y as i32).max().unwrap();
 
-        let mut buf = Vec::with_capacity(1024);
-        for y in min_y..=max_y {
-            for x in min_x..=max_x {
-                let p = Vec2::new(x as f32, y as f32);
+        // Pre-size a bit to avoid repeated reallocations for larger triangles.
+        out.reserve(((max_x - min_x + 1) * (max_y - min_y + 1)) as usize);
 
+        for py in min_y..=max_y {
+            for px in min_x..=max_x {
+                let p = Vec2::new(px as f32, py as f32);
                 if inside_triangle(vertices[0], vertices[1], vertices[2], p) {
-                    let screen_x = (x) as usize;
-                    let screen_y = (y) as usize;
-
-                    if screen_x < term_width as usize && screen_y < term_height as usize {
-                        buf.push((screen_x, screen_y));
-                        // FRAME_BUFFER.set_pixel(screen_x, screen_y, '█');
+                    if px >= 0 && py >= 0 && px < term_width && py < term_height {
+                        out.push(Pixel::new(
+                            px as u16,
+                            py as u16,
+                            '█',
+                            self.color,
+                            self.z_index,
+                        ));
                     }
                 }
             }
-        }
-
-        // FRAME_BUFFER.render(&mut self.stdout);
-        for (x, y) in &buf {
-            queue!(self.stdout, MoveTo(*x as u16, *y as u16), Print("█")).unwrap();
         }
     }
 
@@ -175,8 +150,18 @@ impl Triangle {
 
 impl Shape for Triangle {
     fn draw(&mut self) {
+        // Sort lines deterministically (same as before) so line order is consistent.
         self.lines.sort_by_key(|line| ((line.pos1.y + line.pos2.y) as i32));
-        self.fill_color();
+
+        // Rasterize the filled interior into a temporary pixel buffer and flush
+        // it in a single batched write.
+        let (w, h) = terminal::size().unwrap();
+        let mut pixels: Vec<Pixel> = Vec::with_capacity(1024);
+        self.rasterize(&mut pixels, (w, h));
+        let mut out = std::io::stdout().lock();
+        flush_pixels(&mut out, &mut pixels);
+
+        // Draw border lines on top (each `Line::draw` will rasterize and flush).
         for line in &mut self.lines {
             line.draw();
         }
@@ -229,7 +214,6 @@ impl Clone for Triangle {
                 Line::new(verts[1], verts[2], self.color),
                 Line::new(verts[2], verts[0], self.color),
             ],
-            stdout: stdout().lock(),
         }
     }
 }

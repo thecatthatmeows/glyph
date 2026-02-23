@@ -1,11 +1,19 @@
 use std::f32::consts::PI;
 
-use crate::types::vec2::Vec2;
+use crate::{shapes::pixel::Pixel, types::vec2::Vec2};
 
 pub mod circle;
 pub mod line;
 pub mod rectangle;
 pub mod triangle;
+pub mod pixel;
+
+use std::io::{StdoutLock, Write};
+use crossterm::{
+    cursor::MoveTo,
+    queue,
+    style::{Color, Print, SetForegroundColor},
+};
 
 #[derive(Clone, Copy)]
 pub enum Orientation {
@@ -39,6 +47,12 @@ impl Orientation {
 }
 
 /// Trait representing drawable/updatable shapes.
+///
+/// New method: `rasterize` allows shapes to emit `Pixel`s into a shared buffer
+/// instead of performing terminal IO themselves. A default no-op implementation
+/// is provided so existing shapes compile until they are updated to emit
+/// pixels. Implementations should push pixels corresponding to their coverage
+/// into `out`.
 pub trait Shape {
     fn draw(&mut self);
     fn update(&mut self);
@@ -57,6 +71,14 @@ pub trait Shape {
     /// Return a boxed clone of this shape. This is required for cloning
     /// `Box<dyn Shape>` trait objects.
     fn box_clone(&self) -> Box<dyn Shape>;
+
+    /// Rasterize this shape into the provided pixel buffer. `term_size` is the
+    /// current terminal dimensions as `(width, height)` in u16. The default
+    /// implementation is a no-op to preserve backward compatibility; update
+    /// concrete shapes to push `Pixel`s here for batched rendering.
+    fn rasterize(&self, _out: &mut Vec<Pixel>, _term_size: (u16, u16)) {
+        // default no-op
+    }
 
     fn rotate_to(&mut self, rad: f32) {
         self.set_orientation(Orientation::Custom(rad));
