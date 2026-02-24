@@ -11,6 +11,7 @@ pub struct Line {
     pub pos2: Pos2,
     pub color: Color,
     pub z_index: i32,
+    pub children: Vec<Box<dyn Shape>>,
 }
 
 impl Line {
@@ -20,7 +21,12 @@ impl Line {
             pos2: pos2.into(),
             color,
             z_index: 0,
+            children: vec![],
         }
+    }
+
+    pub fn push(&mut self, child: Box<dyn Shape>) {
+        self.children.push(child);
     }
 }
 
@@ -32,6 +38,7 @@ impl Clone for Line {
             pos2: self.pos2,
             color: self.color,
             z_index: self.z_index,
+            children: self.children.iter().map(|c| c.clone()).collect(),
         }
     }
 }
@@ -45,6 +52,11 @@ impl Shape for Line {
         self.rasterize(&mut pixels, (term_width, term_height));
         let mut out = stdout().lock();
         flush_pixels(&mut out, &mut pixels);
+
+        self.children.sort_by_key(|child| child.z_index());
+        for child in &mut self.children {
+            child.draw();
+        }
     }
 
     fn rasterize(&self, out: &mut Vec<Pixel>, term_size: (u16, u16)) {
@@ -89,6 +101,19 @@ impl Shape for Line {
 
     fn update(&mut self) {
         // Lines do not have dynamic geometry to update here by default.
+
+        self.children.sort_by_key(|child| child.z_index());
+
+        let parent_pos: Vec2<f32> = self.pos().into();
+        for child in &mut self.children {
+            let relative_pos = child.pos().to_relative(parent_pos);
+
+            if let Pos2::Relative(_) = relative_pos {
+                child.set_pos(relative_pos);
+            }
+
+            child.update();
+        }
     }
 
     /// Set this line's position by moving its midpoint to `pos`.

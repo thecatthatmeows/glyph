@@ -18,6 +18,7 @@ pub struct Triangle {
     pub z_index: i32,
     pub color: Color,
     lines: Vec<Line>,
+    pub children: Vec<Box<dyn Shape>>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -67,7 +68,12 @@ impl Triangle {
             ],
             color,
             z_index: 0,
+            children: vec![],
         }
+    }
+
+    pub fn push(&mut self, child: Box<dyn Shape>) {
+        self.children.push(child);
     }
 
     /// Rasterize triangle interior into the output pixel buffer.
@@ -184,10 +190,29 @@ impl Shape for Triangle {
         for line in &mut self.lines {
             line.draw();
         }
+
+        self.children.sort_by_key(|child| child.z_index());
+
+        for child in &mut self.children {
+            child.draw();
+        }
     }
 
     fn update(&mut self) {
         self.update_geometry();
+
+        self.children.sort_by_key(|child| child.z_index());
+
+        let parent_pos: Vec2<f32> = self.pos().into();
+        for child in &mut self.children {
+            let relative_pos = child.pos().to_relative(parent_pos);
+
+            if let Pos2::Relative(_) = relative_pos {
+                child.set_pos(relative_pos);
+            }
+
+            child.update();
+        }
     }
 
     fn set_orientation(&mut self, orientation: Orientation) {
@@ -243,6 +268,7 @@ impl Clone for Triangle {
                 Line::new(verts[1], verts[2], self.color),
                 Line::new(verts[2], verts[0], self.color),
             ],
+            children: self.children.iter().map(|c| c.clone()).collect(),
         }
     }
 }

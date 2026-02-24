@@ -14,6 +14,7 @@ pub struct Circle {
     pub color: Color,
     pub z_index: i32,
     triangles: Vec<Triangle>,
+    pub children: Vec<Box<dyn Shape>>,
 }
 
 impl Circle {
@@ -45,7 +46,12 @@ impl Circle {
             color,
             z_index: 0,
             triangles,
+            children: vec![],
         }
+    }
+
+    pub fn push(&mut self, child: Box<dyn Shape>) {
+        self.children.push(child);
     }
 
     /// Getter for z_index as an inherent method.
@@ -62,6 +68,7 @@ impl Clone for Circle {
         let mut c = Circle::new(self.center, self.radius, n_sectors, self.color);
         c.orientation = self.orientation;
         c.z_index = self.z_index;
+        c.children = self.children.iter().map(|c| c.clone()).collect();
         c
     }
 }
@@ -70,6 +77,12 @@ impl Shape for Circle {
     fn draw(&mut self) {
         for triangle in &mut self.triangles {
             triangle.draw();
+        }
+
+        self.children.sort_by_key(|child| child.z_index());
+
+        for child in &mut self.children {
+            child.draw();
         }
     }
 
@@ -81,6 +94,19 @@ impl Shape for Circle {
 
         // After updates, re-sort by z_index so rendering order respects z values.
         self.triangles.sort_by_key(|t| t.z_index);
+
+        self.children.sort_by_key(|child| child.z_index());
+
+        let parent_pos: Vec2<f32> = self.pos().into();
+        for child in &mut self.children {
+            let relative_pos = child.pos().to_relative(parent_pos);
+
+            if let Pos2::Relative(_) = relative_pos {
+                child.set_pos(relative_pos);
+            }
+
+            child.update();
+        }
     }
 
     fn set_orientation(&mut self, orientation: Orientation) {
