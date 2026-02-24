@@ -1,6 +1,8 @@
 use std::ops::{Add, AddAssign, Div, Mul, Sub};
 use num_traits::{Float, ToPrimitive};
 
+use crate::types::pos2::Pos2;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Vec2<T> {
     pub x: T,
@@ -103,6 +105,95 @@ impl<T: Float> Vec2<T> {
 
 impl<T> Vec2<T>
 where
+    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+{
+    pub fn add_scalar(self, scalar: T) -> Self {
+        Self {
+            x: self.x + scalar,
+            y: self.y + scalar,
+        }
+    }
+
+    pub fn sub_scalar(self, scalar: T) -> Self {
+        Self {
+            x: self.x - scalar,
+            y: self.y - scalar,
+        }
+    }
+
+    pub fn mul_scalar(self, scalar: T) -> Self {
+        Self {
+            x: self.x * scalar,
+            y: self.y * scalar,
+        }
+    }
+
+    pub fn div_scalar(self, scalar: T) -> Self {
+        Self {
+            x: self.x / scalar,
+            y: self.y / scalar,
+        }
+    }
+}
+
+impl<T> Add<T> for Vec2<T>
+where
+    T: Copy + Add<Output = T>,
+{
+    type Output = Self;
+
+    fn add(self, scalar: T) -> Self::Output {
+        Self {
+            x: self.x + scalar,
+            y: self.y + scalar,
+        }
+    }
+}
+
+impl<T> Sub<T> for Vec2<T>
+where
+    T: Copy + Sub<Output = T>,
+{
+    type Output = Self;
+
+    fn sub(self, scalar: T) -> Self::Output {
+        Self {
+            x: self.x - scalar,
+            y: self.y - scalar,
+        }
+    }
+}
+
+impl<T> Mul<T> for Vec2<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    type Output = Self;
+
+    fn mul(self, scalar: T) -> Self::Output {
+        Self {
+            x: self.x * scalar,
+            y: self.y * scalar,
+        }
+    }
+}
+
+impl<T> Div<T> for Vec2<T>
+where
+    T: Copy + Div<Output = T>,
+{
+    type Output = Self;
+
+    fn div(self, scalar: T) -> Self::Output {
+        Self {
+            x: self.x / scalar,
+            y: self.y / scalar,
+        }
+    }
+}
+
+impl<T> Vec2<T>
+where
     T: Copy + Add<Output = T> + ToPrimitive
 {
     pub fn new(x: T, y: T) -> Self {
@@ -141,5 +232,13 @@ where
 {
     fn from(value: &Vec2<T>) -> Self {
         *value
+    }
+}
+
+impl Into<Pos2> for Vec2<f32> {
+    fn into(self) -> Pos2 {
+        match self {
+            Vec2 { x, y } => Pos2::Absolute(Vec2 { x, y }),
+        }
     }
 }
