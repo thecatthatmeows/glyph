@@ -20,12 +20,12 @@ impl KeyInput {
     pub fn update(&mut self) {
         self.previous = self.current.clone();
 
-        while event::poll(Duration::from_millis(0)).unwrap()
-            && let event::Event::Key(event) = event::read().unwrap()
-        {
-            match event.kind {
-                event::KeyEventKind::Press | event::KeyEventKind::Repeat => { self.current.insert(event.code); }
-                event::KeyEventKind::Release => { self.current.remove(&event.code); }
+        while event::poll(Duration::from_millis(0)).unwrap() {
+            if let event::Event::Key(event) = event::read().unwrap() {
+                match event.kind {
+                    event::KeyEventKind::Press | event::KeyEventKind::Repeat => { self.current.insert(event.code); }
+                    event::KeyEventKind::Release => { self.current.remove(&event.code); }
+                }
             }
         }
     }
