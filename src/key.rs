@@ -17,10 +17,10 @@ impl KeyInput {
         }
     }
 
-    pub fn update<F>(&mut self) {
+    pub fn update(&mut self) {
         self.previous = self.current.clone();
 
-        if event::poll(Duration::from_millis(0)).unwrap()
+        while event::poll(Duration::from_millis(0)).unwrap()
             && let event::Event::Key(event) = event::read().unwrap()
         {
             match event.kind {
