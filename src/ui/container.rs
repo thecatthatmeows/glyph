@@ -28,6 +28,10 @@ impl UIElement for UIContainer {
         for child in &self.children {
             child.draw();
         }
+
+        if let Some(border) = &self.border {
+            border.draw();
+        }
     }
 
     fn update(&mut self) {
