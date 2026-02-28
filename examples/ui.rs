@@ -20,8 +20,10 @@ fn main() -> Result<()> {
     let initial_pos = term_size / Vec2::splat(2);
     let mut container = UIContainer::new(initial_pos.to_f32().into(), Vec2::new(20.0, 10.0));
     let text = Text::new(initial_pos.to_f32().into(), Vec2::new(2.0, 2.0), String::from("Hello, World!"));
-    container.add_child(Box::new(text));
-    container.border = Some(Border::new(container.pos, 10.0, Color::White, BorderStyle::Solid));
+    container.add_child(Box::new(text.clone()));
+
+    let border_pos = text.pos() - Vec2::new(text.len() as f32, 0.0);
+    container.border = Some(Border::new(container.pos, container.size.x, Color::White, BorderStyle::Solid));
 
     let mut key_input = KeyInput::new();
 
