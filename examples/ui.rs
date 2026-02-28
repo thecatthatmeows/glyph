@@ -8,7 +8,7 @@ use crossterm::{
     terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
 };
 use rastor::{
-    key::{KeyCode, KeyInput}, shapes::{Shape, rectangle::Rectangle}, types::vec2::Vec2, ui::text::Text, utils::get_terminal_size, ui::UIElement
+    key::{KeyCode, KeyInput}, shapes::{Shape, rectangle::Rectangle}, types::vec2::Vec2, ui::{UIElement, container::UIContainer, style::border::{Border, BorderStyle}, text::Text}, utils::get_terminal_size
 };
 
 fn main() -> Result<()> {
@@ -18,7 +18,10 @@ fn main() -> Result<()> {
 
     let term_size = get_terminal_size()?;
     let initial_pos = term_size / Vec2::splat(2);
-    let mut text = Text::new(initial_pos.to_f32().into(), Vec2::new(2.0, 2.0), String::from("Hello, World!"));
+    let mut container = UIContainer::new(initial_pos.to_f32().into(), Vec2::new(20.0, 10.0));
+    let text = Text::new(initial_pos.to_f32().into(), Vec2::new(2.0, 2.0), String::from("Hello, World!"));
+    container.add_child(Box::new(text));
+    container.border = Some(Border::new(container.pos, 10.0, Color::White, BorderStyle::Solid));
 
     let mut key_input = KeyInput::new();
 
@@ -26,7 +29,7 @@ fn main() -> Result<()> {
     while is_running {
         execute!(stdout, Clear(ClearType::All), MoveTo(0, 0)).unwrap();
 
-        text.draw();
+        container.draw();
 
         if key_input.is_down(&KeyCode::Char('q')) { is_running = false }
 

@@ -1,18 +1,15 @@
-use crate::ui::style::border::Border;
-
-pub trait UIElement {
-    fn draw(&self);
-    fn update(&mut self);
-}
-
+use crate::{types::{pos2::Pos2, vec2::Vec2}, ui::{UIElement, style::border::Border}};
 pub struct UIContainer {
+    pub pos: Pos2,
+    pub size: Vec2<f32>,
     pub children: Vec<Box<dyn UIElement>>,
     pub border: Option<Border>,
 }
 
 impl UIContainer {
-    pub fn new() -> Self {
+    pub fn new(pos: Pos2, size: Vec2<f32>) -> Self {
         Self {
+            pos, size,
             children: Vec::new(),
             border: None
         }
@@ -38,5 +35,13 @@ impl UIElement for UIContainer {
         for child in &mut self.children {
             child.update();
         }
+    }
+    
+    fn pos(&self) -> Pos2 {
+        self.pos
+    }
+    
+    fn size(&self) -> Vec2<f32> {
+        self.size
     }
 }

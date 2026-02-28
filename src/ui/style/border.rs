@@ -1,4 +1,4 @@
-use crate::{shapes::{Shape, line::Line}, types::{color::Color, vec2::Vec2}};
+use crate::{shapes::{Shape, line::Line}, types::{color::Color, pos2::Pos2, vec2::Vec2}};
 
 pub enum BorderStyle {
     Solid,
@@ -8,14 +8,15 @@ pub enum BorderStyle {
 }
 
 pub struct Border {
+    pub pos: Pos2,
     pub width: f32,
     pub color: Color,
     pub style: BorderStyle
 }
 
 impl Border {
-    pub fn new(width: f32, color: Color, style: BorderStyle) -> Self {
-        Self { width, color, style }
+    pub fn new(pos: Pos2, width: f32, color: Color, style: BorderStyle) -> Self {
+        Self { pos, width, color, style }
     }
 
     pub fn draw(&self) {
@@ -24,10 +25,10 @@ impl Border {
             BorderStyle::Solid => {
                 // clockwise, starting from top-left corner
                 let rect_corners = [
-                    Vec2::new(0.0, 0.0), // top left
-                    Vec2::new(1.0, 0.0), // top right
-                    Vec2::new(1.0, 1.0), // bottom right
-                    Vec2::new(0.0, 1.0), // bottom left
+                    self.pos + Vec2::new(0.0, 0.0) * self.width, // top left
+                    self.pos + Vec2::new(1.0, 0.0) * self.width, // top right
+                    self.pos + Vec2::new(1.0, 1.0) * self.width, // bottom right
+                    self.pos + Vec2::new(0.0, 1.0) * self.width, // bottom left
                 ];
                 for i in 0..rect_corners.len() {
                     let rect_corner = rect_corners[i];
