@@ -74,14 +74,12 @@ impl Clone for Circle {
 }
 
 impl Shape for Circle {
-    fn draw(&mut self) {
-        for triangle in &mut self.triangles {
+    fn draw(&self) {
+        for triangle in &self.triangles {
             triangle.draw();
         }
 
-        self.children.sort_by_key(|child| child.z_index());
-
-        for child in &mut self.children {
+        for child in &self.children {
             child.draw();
         }
     }
@@ -94,7 +92,6 @@ impl Shape for Circle {
 
         // After updates, re-sort by z_index so rendering order respects z values.
         self.triangles.sort_by_key(|t| t.z_index);
-
         self.children.sort_by_key(|child| child.z_index());
 
         let parent_pos: Vec2<f32> = self.pos().into();

@@ -44,7 +44,7 @@ impl Clone for Line {
 }
 
 impl Shape for Line {
-    fn draw(&mut self) {
+    fn draw(&self) {
         // For compatibility, draw() will rasterize into a local pixel buffer and
         // then flush via the centralized helper in `shapes::mod.rs`.
         let (term_width, term_height) = terminal::size().unwrap();
@@ -53,8 +53,7 @@ impl Shape for Line {
         let mut out = stdout().lock();
         flush_pixels(&mut out, &mut pixels);
 
-        self.children.sort_by_key(|child| child.z_index());
-        for child in &mut self.children {
+        for child in &self.children {
             child.draw();
         }
     }

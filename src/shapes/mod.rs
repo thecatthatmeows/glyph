@@ -54,7 +54,7 @@ impl Orientation {
 /// pixels. Implementations should push pixels corresponding to their coverage
 /// into `out`.
 pub trait Shape {
-    fn draw(&mut self);
+    fn draw(&self);
     fn update(&mut self);
     fn set_orientation(&mut self, orientation: Orientation);
     fn orientation(&self) -> Orientation;

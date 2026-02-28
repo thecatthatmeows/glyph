@@ -92,15 +92,13 @@ impl Shape for Rectangle {
         }
     }
 
-    fn draw(&mut self) {
-        for triangle in &mut self.triangles {
+    fn draw(&self) {
+        for triangle in &self.triangles {
             triangle.draw();
         }
 
-        self.children.sort_by_key(|child| child.z_index());
-
         // is this considered recursive or..??
-        for child in &mut self.children {
+        for child in &self.children {
             child.draw();
         }
     }

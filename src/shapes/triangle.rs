@@ -169,15 +169,7 @@ impl Triangle {
 }
 
 impl Shape for Triangle {
-    fn draw(&mut self) {
-        // Sort lines deterministically (same as before) so line order is consistent.
-        self.lines.sort_by_key(|line| {
-            let line_pos1: Vec2<f32> = line.pos1.into();
-            let line_pos2: Vec2<f32> = line.pos2.into();
-
-            (line_pos1.y + line_pos2.y) as i32
-        });
-
+    fn draw(&self) {
         // Rasterize the filled interior into a temporary pixel buffer and flush
         // it in a single batched write.
         let (w, h) = terminal::size().unwrap();
@@ -187,13 +179,11 @@ impl Shape for Triangle {
         flush_pixels(&mut out, &mut pixels);
 
         // Draw border lines on top (each `Line::draw` will rasterize and flush).
-        for line in &mut self.lines {
+        for line in &self.lines {
             line.draw();
         }
 
-        self.children.sort_by_key(|child| child.z_index());
-
-        for child in &mut self.children {
+        for child in &self.children {
             child.draw();
         }
     }
@@ -201,6 +191,13 @@ impl Shape for Triangle {
     fn update(&mut self) {
         self.update_geometry();
 
+        // Sort lines deterministically (same as before) so line order is consistent.
+        self.lines.sort_by_key(|line| {
+            let line_pos1: Vec2<f32> = line.pos1.into();
+            let line_pos2: Vec2<f32> = line.pos2.into();
+
+            (line_pos1.y + line_pos2.y) as i32
+        });
         self.children.sort_by_key(|child| child.z_index());
 
         let parent_pos: Vec2<f32> = self.pos().into();
