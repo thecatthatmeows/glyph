@@ -40,7 +40,7 @@ fn main() -> Result<()> {
         // rad = (rad * 2.0) % (PI * 2.0);
 
         // check for 'q' press using KeyInput
-        keys.is_key_pressed(KeyCode::Char('q'), || is_running = false);
+        if keys.is_pressed(&KeyCode::Char('q')) { is_running = false }
     }
     disable_raw_mode().unwrap();
 

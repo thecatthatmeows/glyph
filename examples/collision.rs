@@ -43,7 +43,7 @@ fn main() -> Result<()> {
         println!("{}", rect_collides_with_other);
 
         // Use KeyInput to check for key presses.
-        key_input.is_key_pressed(KeyCode::Char('q'), || is_running = false);
+        if key_input.is_down(&KeyCode::Char('q')) { is_running = false }
     }
     disable_raw_mode().unwrap();
 

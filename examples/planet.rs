@@ -59,7 +59,7 @@ fn main() -> color_eyre::Result<()> {
         }
 
         // Check for 'q' press and stop the loop when pressed.
-        key_input.is_key_pressed(KeyCode::Char('q'), || is_running = false);
+        if key_input.is_pressed(&KeyCode::Char('q')) { is_running = false }
 
         // small sleep to reduce CPU usage
         sleep(Duration::from_millis(16));

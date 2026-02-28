@@ -69,7 +69,7 @@ fn main() -> color_eyre::Result<()> {
         parent_rect.update();
 
         // check for 'q' being pressed and stop the loop when it is
-        key_input.is_key_pressed(KeyCode::Char('q'), || is_running = false);
+        if key_input.is_pressed(&KeyCode::Char('q')) { is_running = false }
 
         // small sleep to avoid busy loop; adjust as desired
         sleep(Duration::from_millis(16));
