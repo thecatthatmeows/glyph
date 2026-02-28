@@ -1,5 +1,6 @@
 pub mod text;
 pub mod container;
+pub mod style;
 
 use crate::{shapes::Shape, types::{pos2::Pos2, vec2::Vec2}};
 
