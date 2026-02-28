@@ -8,7 +8,7 @@ use crossterm::{
     terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
 };
 use rastor::{
-    key::{KeyCode, KeyInput}, shapes::{Shape, rectangle::Rectangle}, types::vec2::Vec2, ui::text::Text, utils::get_terminal_size
+    key::{KeyCode, KeyInput}, shapes::{Shape, rectangle::Rectangle}, types::vec2::Vec2, ui::text::Text, utils::get_terminal_size, ui::UIElement
 };
 
 fn main() -> Result<()> {
