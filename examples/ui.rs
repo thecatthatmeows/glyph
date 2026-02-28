@@ -18,11 +18,11 @@ fn main() -> Result<()> {
 
     let term_size = get_terminal_size()?;
     let initial_pos = term_size / Vec2::splat(2);
-    let mut text = Text::new(initial_pos.to_f32().into(), Vec2::new(0.0, 0.0), String::from("Hello, World!"));
+    let mut text = Text::new(initial_pos.to_f32().into(), Vec2::new(2.0, 2.0), String::from("Hello, World!"));
 
     let mut key_input = KeyInput::new();
 
-    // enable_raw_mode().unwrap();
+    enable_raw_mode().unwrap();
     while is_running {
         execute!(stdout, Clear(ClearType::All), MoveTo(0, 0)).unwrap();
 
@@ -32,7 +32,7 @@ fn main() -> Result<()> {
 
         sleep(Duration::from_millis(16));
     }
-    // disable_raw_mode().unwrap();
+    disable_raw_mode().unwrap();
 
     println!();
     Ok(())
