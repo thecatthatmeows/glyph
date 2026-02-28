@@ -1,44 +1,54 @@
 use crossterm::event;
-use std::{collections::HashSet, time::Duration};
+use parking_lot::Mutex;
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
 // for export
 pub type KeyCode = event::KeyCode;
 
 pub struct KeyInput {
-    current: HashSet<KeyCode>,
-    previous: HashSet<KeyCode>,
+    current: Arc<Mutex<HashSet<KeyCode>>>,
+    previous: Arc<Mutex<HashSet<KeyCode>>>,
 }
 
 impl KeyInput {
     pub fn new() -> Self {
-        Self {
-            current: HashSet::new(),
-            previous: HashSet::new(),
-        }
+        let current = Arc::new(Mutex::new(HashSet::new()));
+        let previous = Arc::new(Mutex::new(HashSet::new()));
+
+        let current_clone = Arc::clone(&current);
+        let previous_clone = Arc::clone(&previous);
+
+        std::thread::spawn(move || {
+            loop {
+                Self::poll_key_event(&current_clone, &previous_clone);
+            }
+        });
+        Self { current, previous }
     }
 
-    pub fn update(&mut self) {
-        self.previous = self.current.clone();
-
+    fn poll_key_event(curr: &Arc<Mutex<HashSet<KeyCode>>>, previous: &Arc<Mutex<HashSet<KeyCode>>>) {
+        let mut prev = previous.lock();
+        let mut curr = curr.lock();
+        *prev = curr.clone();
         while event::poll(Duration::from_millis(0)).unwrap() {
             if let event::Event::Key(event) = event::read().unwrap() {
                 match event.kind {
-                    event::KeyEventKind::Press | event::KeyEventKind::Repeat => { self.current.insert(event.code); }
-                    event::KeyEventKind::Release => { self.current.remove(&event.code); }
+                    event::KeyEventKind::Press | event::KeyEventKind::Repeat => { curr.insert(event.code); }
+                    event::KeyEventKind::Release => { curr.remove(&event.code); }
                 }
             }
         }
     }
 
     pub fn is_down(&mut self, key: &KeyCode) -> bool {
-        self.current.contains(key)
+        self.current.lock().contains(key)
     }
 
     pub fn is_pressed(&mut self, key: &KeyCode) -> bool {
-        self.current.contains(key) && !self.previous.contains(key)
+        self.current.lock().contains(key) && !self.previous.lock().contains(key)
     }
 
     pub fn is_released(&mut self, key: &KeyCode) -> bool {
-        !self.current.contains(key) && self.previous.contains(key)
+        !self.current.lock().contains(key) && self.previous.lock().contains(key)
     }
 }

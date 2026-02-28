@@ -28,7 +28,7 @@ fn main() -> Result<()> {
 
         text.draw();
 
-        if key_input.is_pressed(&KeyCode::Char('q')) { is_running = false }
+        if key_input.is_down(&KeyCode::Char('q')) { is_running = false }
 
         sleep(Duration::from_millis(16));
     }
