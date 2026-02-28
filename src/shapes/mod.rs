@@ -47,12 +47,6 @@ impl Orientation {
 }
 
 /// Trait representing drawable/updatable shapes.
-///
-/// New method: `rasterize` allows shapes to emit `Pixel`s into a shared buffer
-/// instead of performing terminal IO themselves. A default no-op implementation
-/// is provided so existing shapes compile until they are updated to emit
-/// pixels. Implementations should push pixels corresponding to their coverage
-/// into `out`.
 pub trait Shape {
     fn draw(&self);
     fn update(&mut self);
