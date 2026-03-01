@@ -36,11 +36,11 @@ impl UIElement for UIContainer {
             child.update();
         }
     }
-    
+
     fn pos(&self) -> Pos2 {
         self.pos
     }
-    
+
     fn size(&self) -> Vec2<f32> {
         self.size
     }
